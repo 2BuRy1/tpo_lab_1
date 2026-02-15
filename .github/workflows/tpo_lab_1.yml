@@ -1,0 +1,29 @@
+name: Tpo lab1 tests
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Test task_1
+        run: ./gradlew test
+        working-directory: task_1
+
+      - name: Test task_2
+        run: ./gradlew test
+        working-directory: task_2
+
+      - name: Test task_3
+        run: ./gradlew test
+        working-directory: task_3
