@@ -1,63 +1,137 @@
 package org.example.task3;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class SpaceEjectionSceneTest {
+    private static String expectedNarrative;
+
+    @Mock
+    private Engine engine;
+
+    @Mock
+    private AirFlow airFlow;
+
+    @Mock
+    private OuterSpace outerSpace;
+
+    @Mock
+    private EjectionEvent ejectionEvent;
+
+    @Mock
+    private CrewMember ford;
+
+    @Mock
+    private CrewMember arthur;
+
+    private SpaceEjectionScene narrativeScene;
+    private SpaceEjectionScene mockedScene;
+    private Engine realEngine;
+    private AirFlow realAirFlow;
+    private OuterSpace realOuterSpace;
+    private EjectionEvent realEjectionEvent;
+
+    @BeforeAll
+    static void beforeAll() {
+        expectedNarrative = "Зажужжал мотор." + System.lineSeparator()
+            + "Тоненький свист перерос в рев воздуха, вырывающегося в черную пустоту, усеянную невероятно яркими светящимися точками."
+            + System.lineSeparator()
+            + "Форд и Артур вылетели в открытый космос, как конфетти из хлопушки.";
+    }
+
+    @BeforeEach
+    void setUp() {
+        narrativeScene = SpaceEjectionScene.fromNarrative();
+        mockedScene = new SpaceEjectionScene(engine, airFlow, outerSpace, ejectionEvent);
+
+        realEngine = new Engine();
+        realAirFlow = new AirFlow();
+        realOuterSpace = new OuterSpace(true, true, new StarField(10, Brightness.BRIGHT));
+        realEjectionEvent = new EjectionEvent(
+            List.of(new CrewMember("Форд")),
+            realOuterSpace,
+            EjectionStyle.CONFETTI_FROM_POPPER
+        );
+    }
 
     @Test
     void narrativeSceneStartsBeforeEvents() {
-        SpaceEjectionScene scene = SpaceEjectionScene.fromNarrative();
-
-        assertEquals(EngineState.SILENT, scene.getEngine().getState());
-        assertEquals(AirSoundState.THIN_WHISTLE, scene.getAirFlow().getSoundState());
-        assertTrue(scene.getOuterSpace().isOpen());
-        assertTrue(scene.getOuterSpace().isBlackVoid());
-        assertEquals(Brightness.INCREDIBLY_BRIGHT, scene.getOuterSpace().getStarField().brightness());
-        assertEquals(EjectionStyle.CONFETTI_FROM_POPPER, scene.getEjectionEvent().getStyle());
-        assertEquals(List.of("Форд", "Артур"), scene.getEjectionEvent().getCrew().stream().map(CrewMember::getName).toList());
+        assertAll(
+            () -> assertEquals(EngineState.SILENT, narrativeScene.getEngine().getState()),
+            () -> assertEquals(AirSoundState.THIN_WHISTLE, narrativeScene.getAirFlow().getSoundState()),
+            () -> assertTrue(narrativeScene.getOuterSpace().isOpen()),
+            () -> assertTrue(narrativeScene.getOuterSpace().isBlackVoid()),
+            () -> assertEquals(Brightness.INCREDIBLY_BRIGHT, narrativeScene.getOuterSpace().getStarField().brightness()),
+            () -> assertEquals(EjectionStyle.CONFETTI_FROM_POPPER, narrativeScene.getEjectionEvent().getStyle()),
+            () -> assertEquals(
+                List.of("Форд", "Артур"),
+                narrativeScene.getEjectionEvent().getCrew().stream().map(CrewMember::getName).toList()
+            )
+        );
     }
 
     @Test
-    void playOutMovesSceneToFinalNarrativeState() {
-        SpaceEjectionScene scene = SpaceEjectionScene.fromNarrative();
+    void playOutCallsSceneModulesInOrder() {
+        mockedScene.playOut();
 
-        scene.playOut();
-
-        assertTrue(scene.getEngine().isBuzzing());
-        assertEquals(AirSoundState.ROAR, scene.getAirFlow().getSoundState());
-        assertTrue(scene.getEjectionEvent().getCrew().stream().allMatch(CrewMember::isInOpenSpace));
+        InOrder inOrder = inOrder(engine, airFlow, ejectionEvent);
+        inOrder.verify(engine).buzz();
+        inOrder.verify(airFlow).intensifyToRoar();
+        inOrder.verify(ejectionEvent).execute();
     }
 
     @Test
-    void playOutAsNarrativeTextReturnsScenarioAndChangesState() {
-        SpaceEjectionScene scene = SpaceEjectionScene.fromNarrative();
+    void playOutAsNarrativeTextUsesMockedCrewNamesAndTriggersModules() {
+        when(ejectionEvent.getCrew()).thenReturn(List.of(ford, arthur));
+        when(ford.getName()).thenReturn("Форд");
+        when(arthur.getName()).thenReturn("Артур");
 
-        String narrative = scene.playOutAsNarrativeText();
+        String narrative = mockedScene.playOutAsNarrativeText();
 
-        assertTrue(narrative.contains("Зажужжал мотор."));
-        assertTrue(narrative.contains("Тоненький свист перерос в рев воздуха"));
-        assertTrue(narrative.contains("Форд и Артур вылетели в открытый космос, как конфетти из хлопушки."));
-        assertTrue(scene.getEngine().isBuzzing());
-        assertEquals(AirSoundState.ROAR, scene.getAirFlow().getSoundState());
-        assertTrue(scene.getEjectionEvent().getCrew().stream().allMatch(CrewMember::isInOpenSpace));
+        assertAll(
+            () -> assertEquals(expectedNarrative, narrative),
+            () -> verify(engine).buzz(),
+            () -> verify(airFlow).intensifyToRoar(),
+            () -> verify(ejectionEvent).execute(),
+            () -> verify(ejectionEvent).getCrew()
+        );
     }
 
     @Test
     void constructorRejectsNullAggregateDependencies() {
-        Engine engine = new Engine();
-        AirFlow airFlow = new AirFlow();
-        OuterSpace outerSpace = new OuterSpace(true, true, new StarField(10, Brightness.BRIGHT));
-        EjectionEvent ejectionEvent = new EjectionEvent(List.of(new CrewMember("Форд")), outerSpace, EjectionStyle.CONFETTI_FROM_POPPER);
-
-        assertThrows(IllegalArgumentException.class, () -> new SpaceEjectionScene(null, airFlow, outerSpace, ejectionEvent));
-        assertThrows(IllegalArgumentException.class, () -> new SpaceEjectionScene(engine, null, outerSpace, ejectionEvent));
-        assertThrows(IllegalArgumentException.class, () -> new SpaceEjectionScene(engine, airFlow, null, ejectionEvent));
-        assertThrows(IllegalArgumentException.class, () -> new SpaceEjectionScene(engine, airFlow, outerSpace, null));
+        assertAll(
+            () -> assertThrows(
+                IllegalArgumentException.class,
+                () -> new SpaceEjectionScene(null, realAirFlow, realOuterSpace, realEjectionEvent)
+            ),
+            () -> assertThrows(
+                IllegalArgumentException.class,
+                () -> new SpaceEjectionScene(realEngine, null, realOuterSpace, realEjectionEvent)
+            ),
+            () -> assertThrows(
+                IllegalArgumentException.class,
+                () -> new SpaceEjectionScene(realEngine, realAirFlow, null, realEjectionEvent)
+            ),
+            () -> assertThrows(
+                IllegalArgumentException.class,
+                () -> new SpaceEjectionScene(realEngine, realAirFlow, realOuterSpace, null)
+            )
+        );
     }
 }

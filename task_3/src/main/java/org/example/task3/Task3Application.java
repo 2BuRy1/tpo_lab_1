@@ -8,5 +8,4 @@ public final class Task3Application {
         SpaceEjectionScene scene = SpaceEjectionScene.fromNarrative();
         System.out.println(scene.playOutAsNarrativeText());
     }
-
 }
