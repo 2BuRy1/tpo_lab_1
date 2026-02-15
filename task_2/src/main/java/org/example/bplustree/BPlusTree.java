@@ -1,10 +1,18 @@
 package org.example.bplustree;
 
+import org.example.bplustree.utils.InternalNode;
+import org.example.bplustree.utils.LeafNode;
+import org.example.bplustree.utils.Node;
+import org.example.bplustree.utils.TraceStates;
+import org.example.bplustree.utils.TraceStates.*;
+
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+
+import static org.example.bplustree.utils.TraceStates.*;
 
 /**
  * B+ дерево для целочисленных ключей.
@@ -41,14 +49,14 @@ public final class BPlusTree {
         insertInternal(key, null);
     }
 
-    public List<String> insertWithTrace(int key) {
-        List<String> trace = new ArrayList<>();
+    public List<TraceStates> insertWithTrace(int key) {
+        List<TraceStates> trace = new ArrayList<>();
         insertInternal(key, trace);
         return trace;
     }
 
-    public List<String> insertAllWithTrace(List<Integer> keys) {
-        List<String> trace = new ArrayList<>();
+    public List<TraceStates> insertAllWithTrace(List<Integer> keys) {
+        List<TraceStates> trace = new ArrayList<>();
         for (int key : keys) {
             insertInternal(key, trace);
         }
@@ -71,52 +79,52 @@ public final class BPlusTree {
         return result;
     }
 
-    private void insertInternal(int key, List<String> trace) {
-        record(trace, "START_INSERT");
+    private void insertInternal(int key, List<TraceStates> trace) {
+        record(trace, START_INSERT);
 
         Deque<InternalNode> parents = new ArrayDeque<>();
         Deque<Integer> parentChildIndexes = new ArrayDeque<>();
 
-        Node current = root;
+        Node current = (Node) root;
         if (current.isLeaf()) {
-            record(trace, "ROOT_IS_LEAF");
+            record(trace, ROOT_IS_LEAF);
         }
 
         while (!current.isLeaf()) {
             InternalNode internal = (InternalNode) current;
             int childIndex = childIndexForKey(internal.keys, key);
-            record(trace, "DESCEND_INTERNAL");
+            record(trace, DESCEND_INTERNAL);
             parents.push(internal);
             parentChildIndexes.push(childIndex);
             current = internal.children.get(childIndex);
         }
 
         LeafNode leaf = (LeafNode) current;
-        record(trace, "LEAF_FOUND");
+        record(trace, LEAF_FOUND);
 
         int insertPos = findInsertPosition(leaf.keys, key);
         if (insertPos < leaf.keys.size() && leaf.keys.get(insertPos) == key) {
-            record(trace, "DUPLICATE_KEY");
-            record(trace, "END_INSERT");
+            record(trace, DUPLICATE_KEY);
+            record(trace, END_INSERT);
             return;
         }
 
         leaf.keys.add(insertPos, key);
-        record(trace, "LEAF_INSERT");
+        record(trace, LEAF_INSERT);
 
         if (leaf.keys.size() > maxKeys) {
-            record(trace, "LEAF_OVERFLOW");
+            record(trace, LEAF_OVERFLOW);
             splitLeafAndPropagate(leaf, parents, parentChildIndexes, trace);
         }
 
-        record(trace, "END_INSERT");
+        record(trace, END_INSERT);
     }
 
     private void splitLeafAndPropagate(
         LeafNode leaf,
         Deque<InternalNode> parents,
         Deque<Integer> parentChildIndexes,
-        List<String> trace
+        List<TraceStates> trace
     ) {
         int splitIndex = leaf.keys.size() / 2;
 
@@ -127,7 +135,7 @@ public final class BPlusTree {
         rightLeaf.next = leaf.next;
         leaf.next = rightLeaf;
 
-        record(trace, "SPLIT_LEAF");
+        record(trace, SPLIT_LEAF);
 
         int separator = rightLeaf.keys.get(0);
         insertIntoParent(leaf, separator, rightLeaf, parents, parentChildIndexes, trace);
@@ -139,7 +147,7 @@ public final class BPlusTree {
         Node right,
         Deque<InternalNode> parents,
         Deque<Integer> parentChildIndexes,
-        List<String> trace
+        List<TraceStates> trace
     ) {
         if (parents.isEmpty()) {
             InternalNode newRoot = new InternalNode();
@@ -147,20 +155,20 @@ public final class BPlusTree {
             newRoot.children.add(left);
             newRoot.children.add(right);
             root = newRoot;
-            record(trace, "NEW_ROOT");
+            record(trace, NEW_ROOT);
             return;
         }
 
         InternalNode parent = parents.pop();
         int childIndex = parentChildIndexes.pop();
 
-        record(trace, "INSERT_IN_PARENT");
+        record(trace, INSERT_IN_PARENT);
 
         parent.keys.add(childIndex, separator);
         parent.children.add(childIndex + 1, right);
 
         if (parent.keys.size() > maxKeys) {
-            record(trace, "INTERNAL_OVERFLOW");
+            record(trace, INTERNAL_OVERFLOW);
             splitInternalAndPropagate(parent, parents, parentChildIndexes, trace);
         }
     }
@@ -169,7 +177,7 @@ public final class BPlusTree {
         InternalNode node,
         Deque<InternalNode> parents,
         Deque<Integer> parentChildIndexes,
-        List<String> trace
+        List<TraceStates> trace
     ) {
         int middleIndex = node.keys.size() / 2;
         int separator = node.keys.get(middleIndex);
@@ -181,7 +189,7 @@ public final class BPlusTree {
         node.keys.subList(middleIndex, node.keys.size()).clear();
         node.children.subList(middleIndex + 1, node.children.size()).clear();
 
-        record(trace, "SPLIT_INTERNAL");
+        record(trace, SPLIT_INTERNAL);
 
         insertIntoParent(node, separator, rightNode, parents, parentChildIndexes, trace);
     }
@@ -219,37 +227,11 @@ public final class BPlusTree {
         return index;
     }
 
-    private void record(List<String> trace, String point) {
+    private void record(List<TraceStates> trace, TraceStates traceState) {
         if (trace != null) {
-            trace.add(point);
+            trace.add(traceState);
         }
     }
 
-    private abstract static class Node {
-        final List<Integer> keys = new ArrayList<>();
 
-        abstract boolean isLeaf();
-
-        List<Integer> viewKeys() {
-            return Collections.unmodifiableList(keys);
-        }
-    }
-
-    private static final class InternalNode extends Node {
-        final List<Node> children = new ArrayList<>();
-
-        @Override
-        boolean isLeaf() {
-            return false;
-        }
-    }
-
-    private static final class LeafNode extends Node {
-        LeafNode next;
-
-        @Override
-        boolean isLeaf() {
-            return true;
-        }
-    }
 }
