@@ -27,6 +27,9 @@ public final class CrewMember {
     }
 
     public void ejectToOpenSpace() {
+        if (location == Location.OPEN_SPACE) {
+            throw new IllegalStateException("crew member is already in open space");
+        }
         this.location = Location.OPEN_SPACE;
     }
 

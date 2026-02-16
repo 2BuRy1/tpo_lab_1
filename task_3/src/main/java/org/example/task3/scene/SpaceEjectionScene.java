@@ -19,6 +19,7 @@ public final class SpaceEjectionScene {
     private final AirFlow airFlow;
     private final OuterSpace outerSpace;
     private final EjectionEvent ejectionEvent;
+    private SceneState state;
 
     public SpaceEjectionScene(Engine engine, AirFlow airFlow, OuterSpace outerSpace, EjectionEvent ejectionEvent) {
         if (engine == null) {
@@ -37,6 +38,7 @@ public final class SpaceEjectionScene {
         this.airFlow = airFlow;
         this.outerSpace = outerSpace;
         this.ejectionEvent = ejectionEvent;
+        this.state = SceneState.INITIAL;
     }
 
     public static SpaceEjectionScene fromNarrative() {
@@ -74,13 +76,20 @@ public final class SpaceEjectionScene {
         return ejectionEvent;
     }
 
+    public SceneState getState() {
+        return state;
+    }
+
     public void playOut() {
+        ensureInitialState();
         engine.buzz();
         airFlow.intensifyToRoar();
         ejectionEvent.execute();
+        state = SceneState.COMPLETED;
     }
 
     public String playOutAsNarrativeText() {
+        ensureInitialState();
         String lineSeparator = System.lineSeparator();
         StringBuilder narrative = new StringBuilder();
 
@@ -97,7 +106,14 @@ public final class SpaceEjectionScene {
         narrative
             .append(crewNames)
             .append(" вылетели в открытый космос, как конфетти из хлопушки.");
+        state = SceneState.COMPLETED;
 
         return narrative.toString();
+    }
+
+    private void ensureInitialState() {
+        if (state != SceneState.INITIAL) {
+            throw new IllegalStateException("scene has already been played out");
+        }
     }
 }

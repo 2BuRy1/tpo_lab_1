@@ -16,6 +16,9 @@ public final class Engine {
     }
 
     public void buzz() {
+        if (state == EngineState.BUZZING) {
+            throw new IllegalStateException("engine is already buzzing");
+        }
         this.state = EngineState.BUZZING;
     }
 }

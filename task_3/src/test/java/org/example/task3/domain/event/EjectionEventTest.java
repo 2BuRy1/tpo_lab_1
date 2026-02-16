@@ -35,9 +35,17 @@ class EjectionEventTest {
         event.execute();
 
         assertAll(
+            () -> assertEquals(EjectionEventState.EXECUTED, event.getState()),
             () -> assertTrue(ford.isInOpenSpace()),
             () -> assertTrue(arthur.isInOpenSpace())
         );
+    }
+
+    @Test
+    void executeRejectsRepeatedTransition() {
+        event.execute();
+
+        assertThrows(IllegalStateException.class, event::execute);
     }
 
     @Test
@@ -57,6 +65,7 @@ class EjectionEventTest {
         withNull.add(null);
 
         assertAll(
+            () -> assertEquals(EjectionEventState.READY, event.getState()),
             () -> assertThrows(
                 IllegalArgumentException.class,
                 () -> new EjectionEvent(null, outerSpace, EjectionStyle.CONFETTI_FROM_POPPER)

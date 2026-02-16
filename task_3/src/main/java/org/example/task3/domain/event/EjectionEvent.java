@@ -9,6 +9,7 @@ public final class EjectionEvent {
     private final List<CrewMember> crew;
     private final OuterSpace destination;
     private final EjectionStyle style;
+    private EjectionEventState state;
 
     public EjectionEvent(List<CrewMember> crew, OuterSpace destination, EjectionStyle style) {
         if (crew == null || crew.isEmpty()) {
@@ -27,6 +28,7 @@ public final class EjectionEvent {
         this.crew = List.copyOf(crew);
         this.destination = destination;
         this.style = style;
+        this.state = EjectionEventState.READY;
     }
 
     public List<CrewMember> getCrew() {
@@ -41,9 +43,17 @@ public final class EjectionEvent {
         return style;
     }
 
+    public EjectionEventState getState() {
+        return state;
+    }
+
     public void execute() {
+        if (state == EjectionEventState.EXECUTED) {
+            throw new IllegalStateException("ejection event has already been executed");
+        }
         for (CrewMember crewMember : crew) {
             crewMember.ejectToOpenSpace();
         }
+        state = EjectionEventState.EXECUTED;
     }
 }

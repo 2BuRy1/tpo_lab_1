@@ -165,7 +165,7 @@ class BPlusTreeTest {
             tree.insert(key);
         }
 
-        List<TraceStates> trace = tree.insertWithTrace(560); // следующий ключ
+        List<TraceStates> trace = tree.insertWithTrace(560);
 
         assertTrue(trace.contains(INTERNAL_OVERFLOW), "internal overflow must happen");
         assertTrue(trace.contains(SPLIT_INTERNAL), "internal split must happen");
