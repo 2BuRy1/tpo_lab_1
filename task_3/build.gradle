@@ -27,5 +27,5 @@ tasks.test {
 }
 
 application {
-    mainClass = 'org.example.task3.Task3Application'
+    mainClass = 'org.example.task3.app.Task3Application'
 }

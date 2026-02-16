@@ -1,4 +1,4 @@
-package org.example.task3;
+package org.example.task3.scene.engine;
 
 public final class Engine {
     private EngineState state;

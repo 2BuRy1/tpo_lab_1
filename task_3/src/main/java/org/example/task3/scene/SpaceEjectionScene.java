@@ -1,6 +1,16 @@
-package org.example.task3;
+package org.example.task3.scene;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.example.task3.domain.crew.CrewMember;
+import org.example.task3.domain.event.EjectionEvent;
+import org.example.task3.domain.event.EjectionStyle;
+import org.example.task3.domain.space.Brightness;
+import org.example.task3.domain.space.OuterSpace;
+import org.example.task3.domain.space.StarField;
+import org.example.task3.scene.air.AirFlow;
+import org.example.task3.scene.engine.Engine;
 
 public final class SpaceEjectionScene {
     private static final int DEFAULT_GLOWING_POINT_COUNT = 1_000;
@@ -83,7 +93,7 @@ public final class SpaceEjectionScene {
         ).append(lineSeparator);
 
         ejectionEvent.execute();
-        String crewNames = ejectionEvent.getCrew().stream().map(CrewMember::getName).collect(java.util.stream.Collectors.joining(" и "));
+        String crewNames = ejectionEvent.getCrew().stream().map(CrewMember::getName).collect(Collectors.joining(" и "));
         narrative
             .append(crewNames)
             .append(" вылетели в открытый космос, как конфетти из хлопушки.");

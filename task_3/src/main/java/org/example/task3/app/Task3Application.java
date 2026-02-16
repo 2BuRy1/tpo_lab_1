@@ -1,4 +1,6 @@
-package org.example.task3;
+package org.example.task3.app;
+
+import org.example.task3.scene.SpaceEjectionScene;
 
 public final class Task3Application {
     private Task3Application() {

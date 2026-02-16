@@ -1,4 +1,4 @@
-package org.example.task3;
+package org.example.task3.scene;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +9,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+
+import org.example.task3.domain.crew.CrewMember;
+import org.example.task3.domain.event.EjectionEvent;
+import org.example.task3.domain.event.EjectionStyle;
+import org.example.task3.domain.space.Brightness;
+import org.example.task3.domain.space.OuterSpace;
+import org.example.task3.domain.space.StarField;
+import org.example.task3.scene.air.AirFlow;
+import org.example.task3.scene.air.AirSoundState;
+import org.example.task3.scene.engine.Engine;
+import org.example.task3.scene.engine.EngineState;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

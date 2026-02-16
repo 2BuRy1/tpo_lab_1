@@ -1,4 +1,4 @@
-package org.example.task3;
+package org.example.task3.domain.space;
 
 public final class OuterSpace {
     private final boolean open;

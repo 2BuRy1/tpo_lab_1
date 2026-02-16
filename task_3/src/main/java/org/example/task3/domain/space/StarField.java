@@ -1,4 +1,4 @@
-package org.example.task3;
+package org.example.task3.domain.space;
 
 public record StarField(int glowingPointCount, Brightness brightness) {
 

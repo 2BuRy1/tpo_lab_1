@@ -1,6 +1,9 @@
-package org.example.task3;
+package org.example.task3.domain.event;
 
 import java.util.List;
+
+import org.example.task3.domain.crew.CrewMember;
+import org.example.task3.domain.space.OuterSpace;
 
 public final class EjectionEvent {
     private final List<CrewMember> crew;

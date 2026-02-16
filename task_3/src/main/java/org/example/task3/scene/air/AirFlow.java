@@ -1,4 +1,4 @@
-package org.example.task3;
+package org.example.task3.scene.air;
 
 public final class AirFlow {
     private AirSoundState soundState;

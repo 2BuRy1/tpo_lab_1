@@ -1,10 +1,15 @@
-package org.example.task3;
+package org.example.task3.domain.event;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.example.task3.domain.crew.CrewMember;
+import org.example.task3.domain.space.Brightness;
+import org.example.task3.domain.space.OuterSpace;
+import org.example.task3.domain.space.StarField;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

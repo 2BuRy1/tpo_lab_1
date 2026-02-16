@@ -1,7 +1,13 @@
-package org.example.task3;
+package org.example.task3.domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import org.example.task3.domain.crew.CrewMember;
+import org.example.task3.domain.crew.Location;
+import org.example.task3.domain.space.Brightness;
+import org.example.task3.domain.space.OuterSpace;
+import org.example.task3.domain.space.StarField;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,4 +1,4 @@
-package org.example.task3;
+package org.example.task3.domain.space;
 
 public enum Brightness {
     DIM,
