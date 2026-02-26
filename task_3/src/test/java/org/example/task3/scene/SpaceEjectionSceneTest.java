@@ -74,32 +74,22 @@ class SpaceEjectionSceneTest {
 
     @Test
     void playOutTransitionsSceneFromInitialToCompleted() {
-        scene.playOut();
+        String narrative = scene.playOutAsNarrativeText();
 
         assertAll(
             () -> assertEquals(SceneState.COMPLETED, scene.getState()),
             () -> assertTrue(scene.getEngine().isBuzzing()),
             () -> assertEquals(AirSoundState.ROAR, scene.getAirFlow().getSoundState()),
             () -> assertEquals(EjectionEventState.EXECUTED, scene.getEjectionEvent().getState()),
-            () -> assertTrue(scene.getEjectionEvent().getCrew().stream().allMatch(CrewMember::isInOpenSpace))
-        );
-    }
-
-    @Test
-    void playOutAsNarrativeTextTransitionsStateAndReturnsExpectedText() {
-        String narrative = scene.playOutAsNarrativeText();
-
-        assertAll(
-            () -> assertEquals(expectedNarrative, narrative),
-            () -> assertEquals(SceneState.COMPLETED, scene.getState()),
-            () -> assertEquals(EjectionEventState.EXECUTED, scene.getEjectionEvent().getState())
+            () -> assertTrue(scene.getEjectionEvent().getCrew().stream().allMatch(CrewMember::isInOpenSpace)),
+            () -> assertEquals(expectedNarrative, narrative)
         );
     }
 
     @Test
     void sceneRejectsRepeatedPlayOutTransitions() {
         scene.playOut();
-
+        
         assertThrows(IllegalStateException.class, scene::playOut);
     }
 
