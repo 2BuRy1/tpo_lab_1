@@ -16,10 +16,12 @@ import org.example.task3.scene.engine.EngineState;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DomainValidationTest {
     private CrewMember ford;
     private StarField brightField;
+    private OuterSpace outerSpace;
     private Engine engine;
     private AirFlow airFlow;
 
@@ -27,6 +29,7 @@ class DomainValidationTest {
     void setUp() {
         ford = new CrewMember("Форд");
         brightField = new StarField(42, Brightness.INCREDIBLY_BRIGHT);
+        outerSpace = new OuterSpace(true, true, brightField);
         engine = new Engine();
         airFlow = new AirFlow();
     }
@@ -67,12 +70,18 @@ class DomainValidationTest {
     }
 
     @Test
-    void airFlowTransitionsFromWhistleToRoarOnlyOnce() {
+    void airFlowTransitionsFromWhistleToRoarThenBurstsIntoOpenBlackVoid() {
+        assertThrows(IllegalStateException.class, () -> airFlow.burstIntoBlackVoid(outerSpace));
+
         airFlow.intensifyToRoar();
+        airFlow.burstIntoBlackVoid(outerSpace);
 
         assertAll(
             () -> assertEquals(AirSoundState.ROAR, airFlow.getSoundState()),
-            () -> assertThrows(IllegalStateException.class, airFlow::intensifyToRoar)
+            () -> assertTrue(airFlow.isBurstIntoBlackVoid()),
+            () -> assertTrue(outerSpace.isStrewnWithStars()),
+            () -> assertThrows(IllegalStateException.class, airFlow::intensifyToRoar),
+            () -> assertThrows(IllegalStateException.class, () -> airFlow.burstIntoBlackVoid(outerSpace))
         );
     }
 

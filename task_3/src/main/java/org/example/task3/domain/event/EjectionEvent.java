@@ -1,6 +1,7 @@
 package org.example.task3.domain.event;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.example.task3.domain.crew.CrewMember;
 import org.example.task3.domain.space.OuterSpace;
@@ -55,5 +56,11 @@ public final class EjectionEvent {
             crewMember.ejectToOpenSpace();
         }
         state = EjectionEventState.EXECUTED;
+    }
+
+    public String executeWithNarrative() {
+        execute();
+        return crew.stream().map(CrewMember::getName).collect(Collectors.joining(" и "))
+            + " вылетели в открытый космос, как конфетти из хлопушки.";
     }
 }

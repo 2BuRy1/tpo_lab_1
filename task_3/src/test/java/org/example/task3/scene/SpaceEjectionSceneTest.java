@@ -20,6 +20,7 @@ import org.example.task3.scene.engine.EngineState;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,7 +36,11 @@ class SpaceEjectionSceneTest {
     @BeforeAll
     static void beforeAll() {
         expectedNarrative = "Зажужжал мотор." + System.lineSeparator()
-            + "Тоненький свист перерос в рев воздуха, вырывающегося в черную пустоту, усеянную невероятно яркими светящимися точками."
+            + "Тоненький свист перерос в рев воздуха."
+            + System.lineSeparator()
+            + "Рев воздуха вырвался в черную пустоту."
+            + System.lineSeparator()
+            + "Черная пустота усеялась невероятно яркими звездами."
             + System.lineSeparator()
             + "Форд и Артур вылетели в открытый космос, как конфетти из хлопушки.";
     }
@@ -60,8 +65,10 @@ class SpaceEjectionSceneTest {
             () -> assertEquals(SceneState.INITIAL, scene.getState()),
             () -> assertEquals(EngineState.SILENT, scene.getEngine().getState()),
             () -> assertEquals(AirSoundState.THIN_WHISTLE, scene.getAirFlow().getSoundState()),
+            () -> assertFalse(scene.getAirFlow().isBurstIntoBlackVoid()),
             () -> assertTrue(scene.getOuterSpace().isOpen()),
             () -> assertTrue(scene.getOuterSpace().isBlackVoid()),
+            () -> assertFalse(scene.getOuterSpace().isStrewnWithStars()),
             () -> assertEquals(Brightness.INCREDIBLY_BRIGHT, scene.getOuterSpace().getStarField().brightness()),
             () -> assertEquals(EjectionEventState.READY, scene.getEjectionEvent().getState()),
             () -> assertEquals(EjectionStyle.CONFETTI_FROM_POPPER, scene.getEjectionEvent().getStyle()),
@@ -80,6 +87,8 @@ class SpaceEjectionSceneTest {
             () -> assertEquals(SceneState.COMPLETED, scene.getState()),
             () -> assertTrue(scene.getEngine().isBuzzing()),
             () -> assertEquals(AirSoundState.ROAR, scene.getAirFlow().getSoundState()),
+            () -> assertTrue(scene.getAirFlow().isBurstIntoBlackVoid()),
+            () -> assertTrue(scene.getOuterSpace().isStrewnWithStars()),
             () -> assertEquals(EjectionEventState.EXECUTED, scene.getEjectionEvent().getState()),
             () -> assertTrue(scene.getEjectionEvent().getCrew().stream().allMatch(CrewMember::isInOpenSpace)),
             () -> assertEquals(expectedNarrative, narrative)

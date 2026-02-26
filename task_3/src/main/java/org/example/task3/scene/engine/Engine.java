@@ -1,6 +1,8 @@
 package org.example.task3.scene.engine;
 
 public final class Engine {
+    private static final String BUZZ_NARRATIVE = "Зажужжал мотор.";
+
     private EngineState state;
 
     public Engine() {
@@ -20,5 +22,10 @@ public final class Engine {
             throw new IllegalStateException("engine is already buzzing");
         }
         this.state = EngineState.BUZZING;
+    }
+
+    public String buzzWithNarrative() {
+        buzz();
+        return BUZZ_NARRATIVE;
     }
 }

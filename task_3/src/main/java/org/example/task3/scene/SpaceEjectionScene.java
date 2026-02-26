@@ -1,7 +1,7 @@
 package org.example.task3.scene;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.example.task3.domain.crew.CrewMember;
 import org.example.task3.domain.event.EjectionEvent;
@@ -84,31 +84,21 @@ public final class SpaceEjectionScene {
         ensureInitialState();
         engine.buzz();
         airFlow.intensifyToRoar();
+        airFlow.burstIntoBlackVoid(outerSpace);
         ejectionEvent.execute();
         state = SceneState.COMPLETED;
     }
 
     public String playOutAsNarrativeText() {
         ensureInitialState();
-        String lineSeparator = System.lineSeparator();
-        StringBuilder narrative = new StringBuilder();
-
-        engine.buzz();
-        narrative.append("Зажужжал мотор.").append(lineSeparator);
-
-        airFlow.intensifyToRoar();
-        narrative.append(
-            "Тоненький свист перерос в рев воздуха, вырывающегося в черную пустоту, усеянную невероятно яркими светящимися точками."
-        ).append(lineSeparator);
-
-        ejectionEvent.execute();
-        String crewNames = ejectionEvent.getCrew().stream().map(CrewMember::getName).collect(Collectors.joining(" и "));
-        narrative
-            .append(crewNames)
-            .append(" вылетели в открытый космос, как конфетти из хлопушки.");
+        List<String> narrativeLines = new ArrayList<>();
+        narrativeLines.add(engine.buzzWithNarrative());
+        narrativeLines.add(airFlow.intensifyToRoarWithNarrative());
+        narrativeLines.addAll(airFlow.burstIntoBlackVoidWithNarrative(outerSpace));
+        narrativeLines.add(ejectionEvent.executeWithNarrative());
         state = SceneState.COMPLETED;
 
-        return narrative.toString();
+        return String.join(System.lineSeparator(), narrativeLines);
     }
 
     private void ensureInitialState() {
